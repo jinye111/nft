@@ -1,2 +1,12 @@
+[profile.default]
+solc_version = "0.8.24"
+
 [profile.ci.fuzz]
 runs = 10_000
+
+[rpc_endpoints]
+anvil = "http://127.0.0.1:8545"
+sepolia = "https://ethereum-sepolia-rpc.publicnode.com"
+
+[etherscan]
+sepolia = { key = "${ETHERSCAN_API_KEY}" }
