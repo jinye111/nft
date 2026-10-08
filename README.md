@@ -31,6 +31,34 @@ forge script script/DeployTokenBank.s.sol:DeployTokenBank `
 
 ![Github Actions](https://github.com/foundry-rs/forge-template/workflows/CI/badge.svg)
 
+## Vesting (cliff + linear unlock)
+
+`src/Vesting.sol` locks an ERC-20 for a beneficiary:
+
+| Phase | Period | Unlock |
+| --- | --- | --- |
+| Cliff | months 1-12 after deployment | nothing |
+| Linear release | months 13-36 | 1/24 per month (100% at month 36) |
+
+A month is measured as 30 days, so the cliff ends at day 360 and the vesting ends at day 1080. The cliff starts at deployment (`block.timestamp`), and 1,000,000 tokens (18 decimals) are expected to be transferred in with `fund()` (or a plain transfer). The contract inherits nothing: the schedule, the released-amount ledger and `release()` are all implemented in the contract itself, which only imports OpenZeppelin's `IERC20` and `SafeERC20`. `release()` pays the beneficiary everything that has unlocked so far.
+
+Run the time-simulation tests (they use `vm.warp` to jump month by month):
+
+```powershell
+forge test --match-path test/Vesting.t.sol
+```
+
+## Deploy Vesting
+
+Set `TOKEN_ADDRESS` (the locked ERC-20) and `BENEFICIARY` in `.env`. The deploying account must hold at least 1,000,000 of that token; the script approves and funds the vesting contract in the same broadcast.
+
+```powershell
+forge script script/DeployVesting.s.sol:DeployVesting `
+  --rpc-url sepolia `
+  --broadcast `
+  --verify
+```
+
 ## Getting Started
 
 Click "Use this template" on [GitHub](https://github.com/foundry-rs/forge-template) to create a new repository with this repo as the initial state.
